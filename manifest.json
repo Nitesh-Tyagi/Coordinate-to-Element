@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "Coordinate-to-Element",
+    "version": "0.01",
+    "description": "",
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["canvas.js"],
+            "css": ["style.css"]
+        }
+    ],
+    "permissions": [
+        "activeTab",
+        "storage",
+        "tabs"
+    ],
+    "web_accessible_resources": [
+        {
+          "resources": ["images/*"],
+          "matches": ["<all_urls>"]
+        }
+    ]
+}

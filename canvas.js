@@ -88,33 +88,37 @@ function printRect (el) {
     ctx.fillRect(startX, startY, width, height);
 }
 
-function findClosestLeafElements() {
+function findClosestElement() {
     const allElements = document.querySelectorAll("*");
     let closestMatch = null;
     let smallestDifference = Infinity;
+    let highestZIndex = -Infinity;
 
     allElements.forEach(el => {
-        if (el.children.length === 0) { // It's a leaf element
-            const rect = el.getBoundingClientRect();
-            const distance = Math.sqrt(Math.pow(rect.left - startX, 2) + Math.pow(rect.top - startY, 2));
-            const sizeDifference = Math.abs(rect.width - width) + Math.abs(rect.height - height);
+        const rect = el.getBoundingClientRect();
+        const distance = Math.sqrt(Math.pow(rect.left - startX, 2) + Math.pow(rect.top - startY, 2));
+        const sizeDifference = Math.abs(rect.width - width) + Math.abs(rect.height - height);
+        const totalDifference = distance + sizeDifference;
+        const zIndex = window.getComputedStyle(el).zIndex;
+        const numericZIndex = isNaN(parseInt(zIndex)) ? 0 : parseInt(zIndex);
 
-            // Update closest match if this element is closer than previous ones
-            if (distance + sizeDifference < smallestDifference) {
-                closestMatch = el;
-                smallestDifference = distance + sizeDifference;
-            }
+        // Check if this element is a better match based on distance/size and z-index
+        if ((totalDifference < smallestDifference) || (totalDifference === smallestDifference && numericZIndex > highestZIndex)) {
+            closestMatch = el;
+            smallestDifference = totalDifference;
+            highestZIndex = numericZIndex;
         }
     });
 
     if (closestMatch) {
-        console.log("CLOSEST MATCH : ", closestMatch);
-        printRect(closestMatch);
+        console.log("CLOSEST MATCH:", closestMatch);
+        printRect(closestMatch);  // Assuming printRect is a function you have defined elsewhere
         // You can return or do something with closestMatch
     } else {
         console.log("No matching element found.");
     }
 }
+
 
 function setupKeypressActions() {
     console.log("Coordinate-to-Element");
@@ -136,7 +140,7 @@ function setupKeypressActions() {
             console.log("Width : ",width);
             console.log("Height : ",height);
         } else if (event.key === '4') {
-            findClosestLeafElements();
+            findClosestElement();
             // FIND ELEMENT
             // DRAW FOUND ELEMENT
         }

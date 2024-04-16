@@ -15,12 +15,75 @@ window.onload = function() {
     }
 
     window.addEventListener('resize', adjustCanvasSize);
+    function onUserInput(event) {
+        console.log("EVENT : ",event);
+        clearCanvas();
+        printRect(xpath);
+    }
+    
+    // document.addEventListener('click', onUserInput);
+    document.addEventListener('scroll', onUserInput, true);
+    // document.addEventListener('keypress', onUserInput);
+    const inputs = document.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.addEventListener('change', onUserInput);
+    });
+    const scrollableElements = document.querySelectorAll('.scrollable');
+    scrollableElements.forEach(element => {
+        element.addEventListener('scroll', onUserInput);
+    });
+    
 };
+
+// function getXPathByElement(element) {
+//     if (element.id !== '') { // If ID Exists
+//         return `id("${element.id}")`;
+//     }
+//     if (element === document.body) { // Body, base case
+//         return '/html/body';
+//     }
+
+//     let ix = 0;
+//     const siblings = element.parentNode.childNodes;
+//     for (let i = 0; i < siblings.length; i++) {
+//         const sibling = siblings[i];
+//         if (sibling === element) {
+//             return `${getXPathByElement(element.parentNode)}/${element.tagName.toLowerCase()}[${ix + 1}]`;
+//         }
+//         if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
+//             ix++;
+//         }
+//     }
+// }
+function getXPathByElement(element) {
+    if (element.id && element.id !== '') { // Use ID if possible
+        return `//*[@id="${element.id}"]`;
+    }
+    if (element === document.body) { // The body element is the XPath root
+        return '/html/body';
+    }
+
+    var index = 1; // XPath is 1-indexed
+    for (let sibling = element.previousSibling; sibling; sibling = sibling.previousSibling) {
+        if (sibling.nodeType === Node.ELEMENT_NODE && sibling.tagName === element.tagName) {
+            index++;
+        }
+    }
+
+    return `${getXPathByElement(element.parentNode)}/${element.tagName.toLowerCase()}[${index}]`;
+}
+
+function getElementByXPath(xpath) {
+    return document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
+
+
 
 let drawing = false;
 let startX, startY;
 let width, height;
 let currentX, currentY;
+let closestMatch = null, xpath;
 
 function enableDrawing() {
     canvas.onmousedown = function(e) {
@@ -72,7 +135,11 @@ function togglePointerEventsForCanvas() {
     });
 }
 
-function printRect (el) {
+function printRect (xpath) {
+    if(!xpath) return;
+    var el = getElementByXPath(xpath);
+    if(!el) return;
+
     const rect = el.getBoundingClientRect();
     const startX = rect.left;
     const startY = rect.top;
@@ -90,7 +157,7 @@ function printRect (el) {
 
 function findClosestElement() {
     const allElements = document.querySelectorAll("*");
-    let closestMatch = null;
+    closestMatch = null;
     let smallestDifference = Infinity;
     let highestZIndex = -Infinity;
 
@@ -112,8 +179,16 @@ function findClosestElement() {
 
     if (closestMatch) {
         console.log("CLOSEST MATCH:", closestMatch);
-        printRect(closestMatch);  // Assuming printRect is a function you have defined elsewhere
-        // You can return or do something with closestMatch
+    
+        var xpath = getXPathByElement(closestMatch);
+        var matchedEle = getElementByXPath(xpath);
+
+        printRect(xpath);
+
+        console.log(xpath,' : ',matchedEle);
+        if(closestMatch === matchedEle) console.log("XPATH WORKING FINE");
+        else console.log("XPATH DIDN'T MATCH");
+
     } else {
         console.log("No matching element found.");
     }

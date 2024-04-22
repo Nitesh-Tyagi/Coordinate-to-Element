@@ -18,6 +18,7 @@ window.onload = function() {
     let ripples = [];
     let currentInterval = null;
 
+    
     function addRipple(x, y) {
       if (ripples.length === 0 || ripples[ripples.length - 1].circles.length >= 2) {
         // Start a new ripple if there is no ripple or the last ripple already has two circles
@@ -43,9 +44,37 @@ window.onload = function() {
       }, 800); // Adjust timing of circles
     });
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    // function draw() {
+    //   // if(ripples.length>0) console.log("DRAWING : ",ripples);
+    //   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
 
+    //   // Draw each ripple
+    //   ripples.forEach((ripple, index) => {
+    //     ripple.circles.forEach((circle) => {
+    //       if (circle.radius > 0) {
+    //         ctx.beginPath();
+    //         ctx.arc(ripple.x, ripple.y, circle.radius, 0, 2 * Math.PI);
+    //         ctx.fillStyle = `rgba(66, 164, 245, ${circle.opacity})`; // Sky blue color with alpha
+    //         ctx.fill();
+    //       }
+
+    //       circle.radius += 0.6; // Speed of radius increase
+    //       circle.opacity -= 0.011; // Speed of fading
+    //     });
+
+    //     if (ripple.circles.every((circle) => circle.opacity <= 0)) {
+    //       ripples.splice(index, 1);
+    //     }
+    //   });
+
+    //   requestAnimationFrame(draw);
+    // }
+
+    // draw();
+
+    drawInterval = setInterval(() => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    
       // Draw each ripple
       ripples.forEach((ripple, index) => {
         ripple.circles.forEach((circle) => {
@@ -55,18 +84,14 @@ window.onload = function() {
             ctx.fillStyle = `rgba(66, 164, 245, ${circle.opacity})`; // Sky blue color with alpha
             ctx.fill();
           }
-
-          circle.radius += 0.6; // Speed of radius increase
-          circle.opacity -= 0.011; // Speed of fading
+    
+          circle.radius += 2; // Speed of radius increase
+          circle.opacity -= 0.04; // Speed of fading
         });
-
+    
         if (ripple.circles.every((circle) => circle.opacity <= 0)) {
           ripples.splice(index, 1);
         }
       });
-
-      requestAnimationFrame(draw);
-    }
-
-    draw();
+    }, 50);
 }
